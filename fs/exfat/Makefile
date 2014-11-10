@@ -2,9 +2,7 @@
 # Makefile for Linux FAT12/FAT16/FAT32(VFAT)/FAT64(ExFAT) filesystem driver.
 #
 
-# Never compile as an external module
-#ifneq ($(KERNELRELEASE),)
-ifneq (1,)
+ifneq ($(KERNELRELEASE),)
 # call from kernel build system
 
 obj-$(CONFIG_EXFAT_FS) += exfat.o
