@@ -33,6 +33,7 @@
 #include <linux/slab.h>
 #include <linux/fb.h>
 #include <linux/ktrace.h>
+#include <linux/display_state.h>
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/cpufreq_interactive.h>
@@ -1273,7 +1274,7 @@ static ssize_t show_boost(struct cpufreq_interactive_tunables *tunables,
 static ssize_t store_boost(struct cpufreq_interactive_tunables *tunables,
 			   const char *buf, size_t count)
 {
-	int ret;
+/*	int ret;
 	unsigned long val;
 
 	ret = kstrtoul(buf, 0, &val);
@@ -1291,7 +1292,7 @@ static ssize_t store_boost(struct cpufreq_interactive_tunables *tunables,
 		trace_cpufreq_interactive_unboost("off");
 	}
 
-	return count;
+*/	return count;
 }
 
 static ssize_t store_boostpulse(struct cpufreq_interactive_tunables *tunables,
