@@ -184,6 +184,7 @@ else
 		scm=$(scm_version --short)
 		res="$res${scm:++}"
 	fi
+
 fi
 
 echo "$res"
