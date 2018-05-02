@@ -636,7 +636,6 @@ config MSM_BCL_PERIPHERAL_CTL
 	  provides routines to configure and monitor the BCL
 	  PMIC peripheral.
 
-<<<<<<< HEAD
 config BATTERY_CW2015
 	tristate "CW2015 battery driver"
 	depends on I2C
