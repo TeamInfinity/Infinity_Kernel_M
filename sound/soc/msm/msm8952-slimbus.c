@@ -54,7 +54,7 @@
 
 #define WCD9XXX_MBHC_DEF_BUTTONS    8
 #define WCD9XXX_MBHC_DEF_RLOADS     5
-#define CODEC_EXT_CLK_RATE         9600000
+#define CODEC_EXT_CLK_RATE         12288000
 
 #define PRI_MI2S_ID     (1 << 0)
 #define SEC_MI2S_ID     (1 << 1)
@@ -65,7 +65,7 @@
 #define ADSP_STATE_READY_TIMEOUT_MS 50
 #define HS_STARTWORK_TIMEOUT        4000
 
-#define Q6AFE_LPASS_OSR_CLK_9_P600_MHZ	0x927C00
+#define Q6AFE_LPASS_OSR_CLK_12_P288_MHZ	0xBB8000
 #define MAX_AUX_CODECS		4
 
 #define WSA8810_NAME_1 "wsa881x.20170211"
@@ -226,14 +226,14 @@ static void *def_tasha_mbhc_cal(void)
 	btn_high = ((void *)&btn_cfg->_v_btn_low) +
 		(sizeof(btn_cfg->_v_btn_low[0]) * btn_cfg->num_btn);
 
-	btn_high[0] = 75;
-	btn_high[1] = 150;
-	btn_high[2] = 237;
-	btn_high[3] = 450;
-	btn_high[4] = 450;
-	btn_high[5] = 450;
-	btn_high[6] = 450;
-	btn_high[7] = 450;
+	btn_high[0] = 73;
+	btn_high[1] = 146;
+	btn_high[2] = 233;
+	btn_high[3] = 438;
+	btn_high[4] = 438;
+	btn_high[5] = 438;
+	btn_high[6] = 438;
+	btn_high[7] = 438;
 
 	return tasha_wcd_cal;
 }
@@ -496,7 +496,7 @@ static int msm8952_enable_codec_mclk(struct snd_soc_codec *codec, int enable,
 static int slim5_rx_sample_rate_get(struct snd_kcontrol *kcontrol,
 	struct snd_ctl_elem_value *ucontrol)
 {
-	int sample_rate_val = 0;
+	int sample_rate_val = 1;
 
 	switch (slim5_rx_sample_rate) {
 	case SAMPLING_RATE_44P1KHZ:
@@ -616,7 +616,7 @@ static int msm_slim_1_tx_ch_put(struct snd_kcontrol *kcontrol,
 static int slim0_rx_sample_rate_get(struct snd_kcontrol *kcontrol,
 	struct snd_ctl_elem_value *ucontrol)
 {
-	int sample_rate_val = 0;
+	int sample_rate_val = 1;
 
 	switch (slim0_rx_sample_rate) {
 	case SAMPLING_RATE_44P1KHZ:
@@ -674,7 +674,7 @@ static int slim0_rx_sample_rate_put(struct snd_kcontrol *kcontrol,
 static int slim4_rx_sample_rate_get(struct snd_kcontrol *kcontrol,
 	struct snd_ctl_elem_value *ucontrol)
 {
-	int sample_rate_val = 0;
+	int sample_rate_val = 1;
 
 	switch (slim4_rx_sample_rate) {
 	case SAMPLING_RATE_16KHZ:
@@ -824,7 +824,7 @@ static int slim6_rx_bit_format_put(struct snd_kcontrol *kcontrol,
 static int slim6_rx_sample_rate_get(struct snd_kcontrol *kcontrol,
 				     struct snd_ctl_elem_value *ucontrol)
 {
-	int sample_rate_val = 0;
+	int sample_rate_val = 1;
 
 	switch (slim6_rx_sample_rate) {
 	case SAMPLING_RATE_44P1KHZ:
@@ -1203,7 +1203,7 @@ static int msm_slim_2_tx_ch_put(struct snd_kcontrol *kcontrol,
 static int slim0_tx_sample_rate_get(struct snd_kcontrol *kcontrol,
 			struct snd_ctl_elem_value *ucontrol)
 {
-	int sample_rate_val = 0;
+	int sample_rate_val = 1;
 
 	switch (slim0_tx_sample_rate) {
 	case SAMPLING_RATE_16KHZ:
@@ -1262,7 +1262,7 @@ static int slim0_tx_sample_rate_put(struct snd_kcontrol *kcontrol,
 static int slim2_tx_sample_rate_get(struct snd_kcontrol *kcontrol,
 			struct snd_ctl_elem_value *ucontrol)
 {
-	int sample_rate_val = 0;
+	int sample_rate_val = 1;
 
 	switch (slim2_tx_sample_rate) {
 	case SAMPLING_RATE_16KHZ:

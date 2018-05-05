@@ -104,13 +104,13 @@ enum {
 #define MICBIAS_MIN_VAL 1600000
 #define MICBIAS_STEP_SIZE 50000
 
-#define DEFAULT_BOOST_VOLTAGE 5000
-#define MIN_BOOST_VOLTAGE 4000
-#define MAX_BOOST_VOLTAGE 5550
+#define DEFAULT_BOOST_VOLTAGE 5400
+#define MIN_BOOST_VOLTAGE 4400
+#define MAX_BOOST_VOLTAGE 6000
 #define BOOST_VOLTAGE_STEP 50
 
-#define MSM8X16_WCD_MBHC_BTN_COARSE_ADJ  100 /* in mV */
-#define MSM8X16_WCD_MBHC_BTN_FINE_ADJ 12 /* in mV */
+#define MSM8X16_WCD_MBHC_BTN_COARSE_ADJ  60 /* in mV */
+#define MSM8X16_WCD_MBHC_BTN_FINE_ADJ 10 /* in mV */
 
 #define VOLTAGE_CONVERTER(value, min_value, step_size)\
 	((value - min_value)/step_size)
@@ -5817,7 +5817,7 @@ static ssize_t headphone_gain_store(struct kobject *kobj,
 		struct kobj_attribute *attr, const char *buf, size_t count)
 {
 
-	int input_l, input_r;
+	int input_l = 2, input_r = 2;
 
 	sscanf(buf, "%d %d", &input_l, &input_r);
 
