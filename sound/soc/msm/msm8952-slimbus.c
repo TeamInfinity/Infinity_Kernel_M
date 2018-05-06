@@ -725,7 +725,6 @@ static int slim4_rx_sample_rate_put(struct snd_kcontrol *kcontrol,
 	default:
 		slim4_rx_sample_rate = SAMPLING_RATE_96KHZ;
 		break;
-	default:
 		slim4_rx_sample_rate = SAMPLING_RATE_48KHZ;
 	}
 
