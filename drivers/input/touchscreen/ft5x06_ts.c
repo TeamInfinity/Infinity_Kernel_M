@@ -86,13 +86,6 @@ static irqreturn_t ft5x06_ts_interrupt(int irq, void *data);
 #define FT_REG_RESET_FW		0x07
 #define FT_REG_FW_MIN_VER	0xB2
 #define FT_REG_FW_SUB_MIN_VER	0xB3
-#define FT_REG_I2C_MODE		0xEB
-#define FT_REG_FW_LEN		0xB0
-
-/* i2c mode register value */
-#define FT_VAL_I2C_MODE		0xAA
-#define FT_VAL_I2C_MODE_STD	0x09
-#define FT_VAL_I2C_MODE_STD_CFM	0x08
 
 /* gesture register address*/
 #define FT_REG_GESTURE_ENABLE	0xD0
@@ -152,7 +145,7 @@ static irqreturn_t ft5x06_ts_interrupt(int irq, void *data);
 #define FT_UPGRADE_55		0x55
 
 #define FT_FW_MIN_SIZE		8
-#define FT_FW_MAX_SIZE		65536
+#define FT_FW_MAX_SIZE		32768
 
 /* Firmware file is not supporting minor and sub minor so use 0 */
 #define FT_FW_FILE_MAJ_VER(x)	((x)->data[(x)->size - 2])
@@ -181,7 +174,7 @@ static irqreturn_t ft5x06_ts_interrupt(int irq, void *data);
 #define FT_RETRY_DLY		20
 
 #define FT_MAX_WR_BUF		10
-#define FT_MAX_RD_BUF		3
+#define FT_MAX_RD_BUF		2
 #define FT_FW_PKT_LEN		128
 #define FT_FW_PKT_META_LEN	6
 #define FT_FW_PKT_DLY_MS	20
@@ -263,7 +256,6 @@ struct ft5x06_ts_data {
 	struct ft5x06_gesture_platform_data *gesture_pdata;
 	struct regulator *vdd;
 	struct regulator *vcc_i2c;
-	bool regulator_en;
 	struct mutex ft_clk_io_ctrl_mutex;
 	char fw_name[FT_FW_NAME_MAX_LEN];
 	bool loading_fw;
@@ -1178,19 +1170,17 @@ static int ft5x06_ts_start(struct device *dev)
 	struct ft5x06_ts_data *data = dev_get_drvdata(dev);
 	int err;
 
-	if (data->regulator_en) {
-		if (data->pdata->power_on) {
-			err = data->pdata->power_on(true);
-			if (err) {
-				dev_err(dev, "power on failed");
-				return err;
-			}
-		} else {
-			err = ft5x06_power_on(data, true);
-			if (err) {
-				dev_err(dev, "power on failed");
-				return err;
-			}
+	if (data->pdata->power_on) {
+		err = data->pdata->power_on(true);
+		if (err) {
+			dev_err(dev, "power on failed");
+			return err;
+		}
+	} else {
+		err = ft5x06_power_on(data, true);
+		if (err) {
+			dev_err(dev, "power on failed");
+			return err;
 		}
 	}
 
@@ -1228,16 +1218,14 @@ err_gpio_configuration:
 		if (err < 0)
 			dev_err(dev, "Cannot get suspend pinctrl state\n");
 	}
-	if (data->regulator_en) {
-		if (data->pdata->power_on) {
-			err = data->pdata->power_on(false);
-			if (err)
-				dev_err(dev, "power off failed");
-		} else {
-			err = ft5x06_power_on(data, false);
-			if (err)
-				dev_err(dev, "power off failed");
-		}
+	if (data->pdata->power_on) {
+		err = data->pdata->power_on(false);
+		if (err)
+			dev_err(dev, "power off failed");
+	} else {
+		err = ft5x06_power_on(data, false);
+		if (err)
+			dev_err(dev, "power off failed");
 	}
 	return err;
 }
@@ -1264,19 +1252,17 @@ static int ft5x06_ts_stop(struct device *dev)
 		ft5x06_i2c_write(data->client, txbuf, sizeof(txbuf));
 	}
 
-	if (data->regulator_en) {
-		if (data->pdata->power_on) {
-			err = data->pdata->power_on(false);
-			if (err) {
-				dev_err(dev, "power off failed");
-				goto pwr_off_fail;
-			}
-		} else {
-			err = ft5x06_power_on(data, false);
-			if (err) {
-				dev_err(dev, "power off failed");
-				goto pwr_off_fail;
-			}
+	if (data->pdata->power_on) {
+		err = data->pdata->power_on(false);
+		if (err) {
+			dev_err(dev, "power off failed");
+			goto pwr_off_fail;
+		}
+	} else {
+		err = ft5x06_power_on(data, false);
+		if (err) {
+			dev_err(dev, "power off failed");
+			goto pwr_off_fail;
 		}
 	}
 
@@ -1305,16 +1291,14 @@ gpio_configure_fail:
 		if (err < 0)
 			dev_err(dev, "Cannot get active pinctrl state\n");
 	}
-	if (data->regulator_en) {
-		if (data->pdata->power_on) {
-			err = data->pdata->power_on(true);
-			if (err)
-				dev_err(dev, "power on failed");
-		} else {
-			err = ft5x06_power_on(data, true);
-			if (err)
-				dev_err(dev, "power on failed");
-		}
+	if (data->pdata->power_on) {
+		err = data->pdata->power_on(true);
+		if (err)
+			dev_err(dev, "power on failed");
+	} else {
+		err = ft5x06_power_on(data, true);
+		if (err)
+			dev_err(dev, "power on failed");
 	}
 pwr_off_fail:
 	if (gpio_is_valid(data->pdata->reset_gpio)) {
@@ -1568,20 +1552,6 @@ static int ft5x06_fw_upgrade_start(struct i2c_client *client,
 		else
 			msleep(info.delay_55 - (i - (FT_UPGRADE_LOOP / 2)) * 2);
 
-		/* Set i2c to std i2c mode */
-		w_buf[0] = FT_REG_I2C_MODE;
-		w_buf[1] = FT_VAL_I2C_MODE;
-		w_buf[2] = FT_VAL_I2C_MODE_STD;
-		ft5x06_i2c_read(client, w_buf, 3, r_buf, 3);
-		if (r_buf[0] != FT_REG_I2C_MODE ||
-			r_buf[1] != FT_VAL_I2C_MODE ||
-			r_buf[2] != FT_VAL_I2C_MODE_STD_CFM) {
-			dev_err(&client->dev,
-				"set std i2c error. r_val = 0x%02x%02x%02x\n",
-				r_buf[0], r_buf[1], r_buf[2]);
-			continue;
-		}
-
 		/* Enter upgrade mode */
 		w_buf[0] = FT_UPGRADE_55;
 		ft5x06_i2c_write(client, w_buf, 1);
@@ -1643,11 +1613,12 @@ static int ft5x06_fw_upgrade_start(struct i2c_client *client,
 	}
 	msleep(FT_EARSE_DLY_MS);
 
-	w_buf[0] = FT_REG_FW_LEN;
-	w_buf[1] = (u8)((data_len>>16) & 0xff);
-	w_buf[2] = (u8)((data_len>>8) & 0xff);
-	w_buf[3] = (u8)((data_len) & 0xff);
-	ft5x06_i2c_write(client, w_buf, 4);
+	/* program firmware */
+	if (is_5336_new_bootloader == FT_BLOADER_VERSION_LZ4
+		|| is_5336_new_bootloader == FT_BLOADER_VERSION_Z7)
+		data_len = data_len - FT_DATA_LEN_OFF_OLD_FW;
+	else
+		data_len = data_len - FT_DATA_LEN_OFF_NEW_FW;
 
 	pkt_num = (data_len) / FT_FW_PKT_LEN;
 	pkt_len = FT_FW_PKT_LEN;
@@ -2370,31 +2341,29 @@ static int ft5x06_ts_probe(struct i2c_client *client,
 
 	if (pdata->power_init) {
 		err = pdata->power_init(true);
-		if (err)
-			dev_warn(&client->dev, "power init failed");
-		else
-			data->regulator_en = true;
+		if (err) {
+			dev_err(&client->dev, "power init failed");
+			goto unreg_inputdev;
+		}
 	} else {
 		err = ft5x06_power_init(data, true);
-		if (err)
-			dev_warn(&client->dev, "power init failed");
-		else
-			data->regulator_en = true;
+		if (err) {
+			dev_err(&client->dev, "power init failed");
+			goto unreg_inputdev;
+		}
 	}
 
-	if (data->regulator_en) {
-		if (pdata->power_on) {
-			err = pdata->power_on(true);
-			if (err) {
-				dev_err(&client->dev, "power on failed");
-				goto pwr_deinit;
-			}
-		} else {
-			err = ft5x06_power_on(data, true);
-			if (err) {
-				dev_err(&client->dev, "power on failed");
-				goto pwr_deinit;
-			}
+	if (pdata->power_on) {
+		err = pdata->power_on(true);
+		if (err) {
+			dev_err(&client->dev, "power on failed");
+			goto pwr_deinit;
+		}
+	} else {
+		err = ft5x06_power_on(data, true);
+		if (err) {
+			dev_err(&client->dev, "power on failed");
+			goto pwr_deinit;
 		}
 	}
 
@@ -2686,20 +2655,16 @@ err_gpio_req:
 				pr_err("failed to select relase pinctrl state\n");
 		}
 	}
-
-	if (data->regulator_en) {
-		if (pdata->power_on)
-			pdata->power_on(false);
-		else
-			ft5x06_power_on(data, false);
-	}
+	if (pdata->power_on)
+		pdata->power_on(false);
+	else
+		ft5x06_power_on(data, false);
 pwr_deinit:
-	if (data->regulator_en) {
-		if (pdata->power_init)
-			pdata->power_init(false);
-		else
-			ft5x06_power_init(data, false);
-	}
+	if (pdata->power_init)
+		pdata->power_init(false);
+	else
+		ft5x06_power_init(data, false);
+unreg_inputdev:
 	input_unregister_device(input_dev);
 	return err;
 }
@@ -2755,17 +2720,15 @@ static int ft5x06_ts_remove(struct i2c_client *client)
 					&attrs[attr_count].attr);
 	}
 
-	if (data->regulator_en) {
-		if (data->pdata->power_on)
-			data->pdata->power_on(false);
-		else
-			ft5x06_power_on(data, false);
+	if (data->pdata->power_on)
+		data->pdata->power_on(false);
+	else
+		ft5x06_power_on(data, false);
 
-		if (data->pdata->power_init)
-			data->pdata->power_init(false);
-		else
-			ft5x06_power_init(data, false);
-	}
+	if (data->pdata->power_init)
+		data->pdata->power_init(false);
+	else
+		ft5x06_power_init(data, false);
 
 	input_unregister_device(data->input_dev);
 	kobject_put(data->ts_info_kobj);
