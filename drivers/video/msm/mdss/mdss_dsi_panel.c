@@ -29,13 +29,11 @@
 #ifdef TARGET_HW_MDSS_HDMI
 #include "mdss_dba_utils.h"
 #endif
-<<<<<<< HEAD
-=======
 
 #ifdef CONFIG_POWERSUSPEND
 #include <linux/powersuspend.h>
 #endif
->>>>>>> 4c902fc... video: mdss: LiveDisplay driver
+
 #include "mdss_livedisplay.h"
 
 #define DT_CMD_HDR 6
