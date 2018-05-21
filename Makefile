@@ -380,6 +380,13 @@ AFLAGS_MODULE   =
 LDFLAGS_MODULE  =
 CFLAGS_KERNEL	=
 AFLAGS_KERNEL	=
+KERNELFLAGS = -pipe -DNDEBUG -O2 -mtune=cortex-a53
+MODFLAGS	= -DMODULE $(KERNELFLAGS)
+CFLAGS_MODULE	= $(MODFLAGS)
+AFLAGS_MODULE	= $(MODFLAGS)
+LDFLAGS_MODULE  = -T $(srctree)/scripts/module-common.lds
+CFLAGS_KERNEL	= $(KERNELFLAGS)
+AFLAGS_KERNEL	= $(KERNELFLAGS)
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage -fno-tree-loop-im
 CFLAGS_KCOV	= -fsanitize-coverage=trace-pc
 
