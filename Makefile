@@ -373,22 +373,14 @@ CHECK		= sparse
 CC		= $(srctree)/scripts/gcc-wrapper.py $(REAL_CC)
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
-		  -Wbitwise -Wno-return-void $(CF)
-
+                  -Wbitwise -Wno-return-void $(CF)
 CFLAGS_MODULE   =
 AFLAGS_MODULE   =
 LDFLAGS_MODULE  =
-CFLAGS_KERNEL	=
-AFLAGS_KERNEL	=
-KERNELFLAGS = -pipe -DNDEBUG -O2 -mtune=cortex-a53
-MODFLAGS	= -DMODULE $(KERNELFLAGS)
-CFLAGS_MODULE	= $(MODFLAGS)
-AFLAGS_MODULE	= $(MODFLAGS)
-LDFLAGS_MODULE  = -T $(srctree)/scripts/module-common.lds
-CFLAGS_KERNEL	= $(KERNELFLAGS)
-AFLAGS_KERNEL	= $(KERNELFLAGS)
-CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage -fno-tree-loop-im
-CFLAGS_KCOV	= -fsanitize-coverage=trace-pc
+CFLAGS_KERNEL   =
+AFLAGS_KERNEL   =
+CFLAGS_GCOV     = -fprofile-arcs -ftest-coverage -fno-tree-loop-im
+CFLAGS_KCOV     = -fsanitize-coverage=trace-pc
 
 
 # Use USERINCLUDE when you must reference the UAPI directories only.
