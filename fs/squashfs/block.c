@@ -121,12 +121,11 @@ static void squashfs_process_blocks(struct squashfs_read_request *req)
 
 	if (req->data_processing == SQUASHFS_METADATA) {
 		/* Extract the length of the metadata block */
-		if (req->offset != msblk->devblksize - 1) {
-			length = le16_to_cpup((__le16 *)
-					(bh[0]->b_data + req->offset));
-		} else {
-			length = (unsigned char)bh[0]->b_data[req->offset];
-			length |= (unsigned char)bh[1]->b_data[0] << 8;
+		if (req->offset != msblk->devblksize - 1)
+			length = *((u16 *)(bh[0]->b_data + req->offset));
+		else {
+			length = bh[0]->b_data[req->offset];
+			length |= bh[1]->b_data[0] << 8;
 		}
 		req->compressed = SQUASHFS_COMPRESSED(length);
 		req->data_processing = req->compressed ? SQUASHFS_DECOMPRESS
@@ -309,7 +308,7 @@ static int squashfs_bio_submit(struct squashfs_read_request *req)
 		if (!bio)
 			goto bio_alloc_failed;
 		bio->bi_bdev = req->sb->s_bdev;
-		bio->bi_iter.bi_sector = (block + b)
+		bio->bi_sector = (block + b)
 				       << (msblk->devblksize_log2 - 9);
 		bio->bi_private = bio_req;
 		bio->bi_end_io = squashfs_bio_end_io;
