@@ -625,11 +625,8 @@ err_out:
 
 out_handle_failed_inode:
 
-	d_instantiate_new(dentry, inode);
-	return err;
-out:
+        handle_failed_inode(inode);
 
-	handle_failed_inode(inode);
 out_free_encrypted_link:
 	if (disk_link.name != (unsigned char *)symname)
 		kfree(disk_link.name);
